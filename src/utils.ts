@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
 import * as fs from 'fs'
-
+import { execSync } from 'child_process'
 
 function useGitCommands(folder: vscode.WorkspaceFolder | undefined) {
   if (!folder) return false
@@ -26,5 +26,26 @@ export function getGitUrl() {
     if (!folder) return null
     
     const gitUrl = useGitCommands(folder)
+    return gitUrl
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+
+export function getGitCurrentBranch() {
+  try {
+    const folder = vscode.workspace.workspaceFolders?.[0] ?? undefined
+    if (!folder) return null
+
+    const gitBranch = execSync('git rev-parse --abbrev-ref HEAD', {
+      cwd: folder.uri.fsPath,
+      encoding: 'utf-8',
+    })
+
+    return gitBranch.trim()
+  } catch (error) {
+    console.error(error)
+    return null
   }
 }
